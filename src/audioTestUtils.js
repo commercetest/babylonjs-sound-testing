@@ -46,6 +46,37 @@ export function generateSilence(audioContext, duration, sampleRate = 44100) {
 export async function audioBufferToBlob(audioBuffer) {
   const numOfChannels = audioBuffer.numberOfChannels;
   const length = audioBuffer.length * numOfChannels * 2;
+
+  // Handle zero-length buffers
+  if (audioBuffer.length === 0) {
+    // Return minimal valid WAV with just header
+    const buffer = new ArrayBuffer(44);
+    const view = new DataView(buffer);
+    let pos = 0;
+
+    const writeString = (str) => {
+      for (let i = 0; i < str.length; i++) {
+        view.setUint8(pos++, str.charCodeAt(i));
+      }
+    };
+
+    writeString('RIFF');
+    view.setUint32(pos, 36, true); pos += 4; // File size - 8
+    writeString('WAVE');
+    writeString('fmt ');
+    view.setUint32(pos, 16, true); pos += 4;
+    view.setUint16(pos, 1, true); pos += 2; // PCM
+    view.setUint16(pos, numOfChannels, true); pos += 2;
+    view.setUint32(pos, audioBuffer.sampleRate, true); pos += 4;
+    view.setUint32(pos, audioBuffer.sampleRate * 2 * numOfChannels, true); pos += 4;
+    view.setUint16(pos, numOfChannels * 2, true); pos += 2;
+    view.setUint16(pos, 16, true); pos += 2;
+    writeString('data');
+    view.setUint32(pos, 0, true); // Zero data length
+
+    return new Blob([buffer], { type: 'audio/wav' });
+  }
+
   const buffer = new ArrayBuffer(44 + length);
   const view = new DataView(buffer);
   const channels = [];
