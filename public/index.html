@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BabylonJS Sound Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>BabylonJS Sound Testing Environment</h1>
+    <div id="status">Loading...</div>
+    <button id="testBtn">Test Sound</button>
+
+    <script type="module">
+        import { SoundWrapper } from '../src/soundWrapper.js';
+
+        // Make SoundWrapper available globally for tests
+        window.SoundWrapper = SoundWrapper;
+
+        const status = document.getElementById('status');
+        status.textContent = 'Ready for testing';
+
+        // Test button for manual testing
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            status.textContent = 'Creating sound...';
+            try {
+                const sound = await SoundWrapper.createSound('test', './test-audio.mp3');
+                status.textContent = 'Sound created successfully';
+                sound.play();
+            } catch (error) {
+                status.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
