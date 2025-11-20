@@ -33,25 +33,64 @@ npm run playwright:install
 
 ## Running Tests
 
-### Run all tests once
-```bash
-npm run test:run
-```
+**Important**: The tests require a development server to be running because they use Playwright to test the sound wrapper in a headless browser environment.
 
-### Run tests in watch mode
+### Option 1: Automated (Recommended)
+
+The easiest way - the dev server starts and stops automatically:
+
 ```bash
+# Run all tests once (server starts/stops automatically)
 npm test
 ```
 
-### Run tests with UI
+### Option 2: Manual (Two terminals)
+
+For development with watch mode, run these in separate terminals:
+
+**Terminal 1 - Start the dev server:**
+```bash
+npm run dev
+```
+
+**Terminal 2 - Run tests in watch mode:**
+```bash
+npm run test:watch
+```
+
+Or run tests once:
+```bash
+npm run test:run-only
+```
+
+### Option 3: With UI
+
+**Terminal 1 - Start the dev server:**
+```bash
+npm run dev
+```
+
+**Terminal 2 - Run tests with UI:**
 ```bash
 npm run test:ui
 ```
 
-### Start development server
-```bash
-npm run dev
-```
+### All Available Scripts
+
+- `npm test` - Run tests once with automatic server management (recommended)
+- `npm run dev` - Start development server on http://localhost:5173
+- `npm run test:watch` - Run tests in watch mode (requires dev server running)
+- `npm run test:ui` - Run tests with Vitest UI (requires dev server running)
+- `npm run test:run-only` - Run tests once (requires dev server running)
+
+### Troubleshooting
+
+**Tests fail with "ERR_CONNECTION_REFUSED"**
+- The dev server isn't running. Use `npm test` (automatic) or start the dev server manually with `npm run dev`
+
+**Port 5173 already in use**
+- Stop any other Vite servers: `lsof -ti:5173 | xargs kill -9` (macOS/Linux)
+- Or change the port in `vite.config.js`
 
 ## Phase 1: Foundation Tests (IMPLEMENTED ✓)
 

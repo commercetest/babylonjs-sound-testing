@@ -7,9 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "bash scripts/test-with-server.sh",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run",
+    "test:run-only": "vitest run",
     "playwright:install": "playwright install chromium"
   },
   "keywords": ["babylonjs", "sound", "audio", "testing"],
