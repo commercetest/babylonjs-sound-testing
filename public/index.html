@@ -25,12 +25,14 @@
 
     <script type="module">
         import { SoundWrapper } from '../src/soundWrapper.js';
+        import * as AudioTestUtils from '../src/audioTestUtils.js';
 
-        // Make SoundWrapper available globally for tests
+        // Make modules available globally for tests
         window.SoundWrapper = SoundWrapper;
+        window.AudioTestUtils = AudioTestUtils;
 
         const status = document.getElementById('status');
-        status.textContent = 'Ready for testing';
+        status.textContent = 'Ready for testing (Phase 1 & 2)';
 
         // Test button for manual testing
         document.getElementById('testBtn').addEventListener('click', async () => {

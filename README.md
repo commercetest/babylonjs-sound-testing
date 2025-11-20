@@ -92,6 +92,12 @@ npm run test:ui
 - Stop any other Vite servers: `lsof -ti:5173 | xargs kill -9` (macOS/Linux)
 - Or change the port in `vite.config.js`
 
+## Test Summary
+
+**Total: 53 tests passing** ✓
+- Phase 1: 36 tests (API & State Management)
+- Phase 2: 17 tests (Audio Analysis & Timing)
+
 ## Phase 1: Foundation Tests (IMPLEMENTED ✓)
 
 Phase 1 focuses on testing the API interface and state management without requiring actual audio playback. All tests use mock sound objects to verify the wrapper's behavior.
@@ -156,19 +162,84 @@ wrapper.sound = {
 };
 ```
 
-## Next Steps: Phase 2 & 3
+## Phase 2: Audio Analysis (IMPLEMENTED ✓)
 
-### Phase 2: Audio Analysis (Not Yet Implemented)
-- Frequency detection using BabylonJS analyzer
-- Audio output verification
-- Basic silence detection
-- Timing synchronization
+Phase 2 tests actual audio generation and analysis using Web Audio API. These tests generate programmatic test tones with known frequencies and verify audio characteristics.
+
+### Test Coverage (17 tests passing)
+
+#### Frequency Detection (6 tests)
+- ✓ AudioTestUtils module loads successfully
+- ✓ Generate test tones with known frequencies
+- ✓ Detect dominant frequency in generated tone
+- ✓ Detect presence of specific frequencies
+- ✓ Differentiate between different frequencies (440Hz vs 880Hz)
+- ✓ Calculate RMS (Root Mean Square) of frequency data
+
+#### Audio Output Verification (5 tests)
+- ✓ Detect audio output from generated tone
+- ✓ Detect silence when no audio is playing
+- ✓ Differentiate between silence and audio using RMS
+- ✓ Verify AudioContext is running correctly
+- ✓ Handle multiple audio sources simultaneously
+
+#### Timing & Synchronization (6 tests)
+- ✓ Report correct audio buffer duration
+- ✓ Track AudioContext currentTime progression
+- ✓ Start audio playback immediately
+- ✓ Schedule audio to start at specific times
+- ✓ Handle rapid start/stop cycles
+- ✓ Maintain timing accuracy over multiple samples
+
+### Phase 2 Implementation Details
+
+**Programmatic Audio Generation**
+Phase 2 uses Web Audio API to generate test tones programmatically:
+
+```javascript
+// Generate a 440Hz tone (A4 note) for 1 second
+const audioContext = new AudioContext();
+const audioBuffer = AudioTestUtils.generateTestTone(audioContext, 440, 1.0);
+```
+
+**Frequency Analysis**
+Tests use AnalyserNode to capture frequency data and verify audio characteristics:
+
+```javascript
+const analyser = audioContext.createAnalyser();
+analyser.fftSize = 4096;
+const frequencyData = new Float32Array(analyser.frequencyBinCount);
+analyser.getFloatFrequencyData(frequencyData);
+
+const dominantFreq = AudioTestUtils.findDominantFrequency(
+  frequencyData,
+  audioContext.sampleRate
+);
+```
+
+**Key Utilities** (`src/audioTestUtils.js`)
+- `generateTestTone()` - Create sine wave at specific frequency
+- `generateSilence()` - Create silent audio buffer
+- `findDominantFrequency()` - FFT-based frequency detection
+- `hasFrequency()` - Check if specific frequency is present
+- `isSilent()` - Detect silence in audio
+- `calculateRMS()` - Measure overall audio energy
+
+### Headless Browser Considerations
+
+Phase 2 tests run in headless Chromium, which has some timing characteristics:
+- AudioContext timing may have ~20-50ms variance
+- FFT analysis has inherent inaccuracies (tests use 30% tolerance)
+- Tests ensure AudioContext is in "running" state before analysis
+- Multiple samples used to verify consistent behavior
+
+## Next Steps: Phase 3
 
 ### Phase 3: Advanced Testing (Not Yet Implemented)
-- Tone/pitch accuracy verification
-- Volume amplitude analysis
-- Audio quality assessment
-- Spatial audio testing
+- Tone/pitch accuracy verification with playback rate changes
+- Volume amplitude analysis and fade testing
+- Audio quality assessment (distortion, clipping detection)
+- Spatial audio testing with 3D positioning
 
 See `ideas/sound-testing-strategy.md` for detailed planning.
 
@@ -188,9 +259,13 @@ Main wrapper around BabylonJS Sound API.
 - `createSound(name, url, options)` - Create and load a sound
 
 #### Instance Methods
+
+**Playback Control:**
 - `play()` - Start playback
 - `stop()` - Stop playback
 - `pause()` - Pause playback
+
+**Configuration:**
 - `setVolume(volume, fadeTime?)` - Set volume (0-1+)
 - `getVolume()` - Get current volume
 - `setPlaybackRate(rate)` - Set playback speed
@@ -198,6 +273,15 @@ Main wrapper around BabylonJS Sound API.
 - `setLoop(loop)` - Enable/disable looping
 - `getLoop()` - Get loop state
 - `setPanning(pan)` - Set stereo position (-1 to 1)
+
+**Audio Analysis (Phase 2):**
+- `attachAnalyzer()` - Attach analyzer for frequency analysis
+- `getAnalyzer()` - Get the Web Audio AnalyserNode
+- `getFrequencyData()` - Get frequency data as Float32Array (dB)
+- `getByteFrequencyData()` - Get frequency data as Uint8Array (0-255)
+- `getSampleRate()` - Get audio context sample rate
+
+**Information:**
 - `getDuration()` - Get sound duration
 - `getCurrentTime()` - Get current playback position
 - `dispose()` - Clean up and free resources

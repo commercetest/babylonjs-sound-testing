@@ -180,6 +180,97 @@ export class SoundWrapper {
   }
 
   /**
+   * Attach an analyzer to the sound for frequency analysis
+   * Must be called before playing the sound for optimal performance
+   * @returns {boolean} - True if analyzer was attached successfully
+   */
+  attachAnalyzer() {
+    if (this.sound) {
+      // BabylonJS Sound has built-in analyzer support
+      // Check if the sound has an analyzer method
+      if (typeof this.sound.attachToAnalyser === 'function') {
+        this.sound.attachToAnalyser();
+        return true;
+      }
+      // Fallback: manually create analyzer if needed
+      if (this.sound._audioEngine && this.sound._audioEngine.audioContext) {
+        const audioContext = this.sound._audioEngine.audioContext;
+        if (!this.sound._analyser) {
+          this.sound._analyser = audioContext.createAnalyser();
+          this.sound._analyser.fftSize = 2048;
+
+          // Connect the sound source to the analyzer
+          if (this.sound._soundSource) {
+            this.sound._soundSource.connect(this.sound._analyser);
+          }
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Get the analyzer node (Web Audio API AnalyserNode)
+   * @returns {AnalyserNode|null} - The analyzer node or null
+   */
+  getAnalyzer() {
+    if (this.sound) {
+      // Try BabylonJS built-in analyzer first
+      if (this.sound._analyser) {
+        return this.sound._analyser;
+      }
+      // Check if sound has getSoundSource method
+      if (typeof this.sound.getSoundSource === 'function') {
+        const source = this.sound.getSoundSource();
+        if (source && source._analyser) {
+          return source._analyser;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get frequency data from the analyzer
+   * @returns {Float32Array|null} - Frequency data in dB or null if no analyzer
+   */
+  getFrequencyData() {
+    const analyzer = this.getAnalyzer();
+    if (analyzer) {
+      const dataArray = new Float32Array(analyzer.frequencyBinCount);
+      analyzer.getFloatFrequencyData(dataArray);
+      return dataArray;
+    }
+    return null;
+  }
+
+  /**
+   * Get byte frequency data from the analyzer
+   * @returns {Uint8Array|null} - Frequency data as bytes (0-255) or null if no analyzer
+   */
+  getByteFrequencyData() {
+    const analyzer = this.getAnalyzer();
+    if (analyzer) {
+      const dataArray = new Uint8Array(analyzer.frequencyBinCount);
+      analyzer.getByteFrequencyData(dataArray);
+      return dataArray;
+    }
+    return null;
+  }
+
+  /**
+   * Get the sample rate of the audio context
+   * @returns {number} - Sample rate in Hz
+   */
+  getSampleRate() {
+    if (this.sound && this.sound._audioEngine && this.sound._audioEngine.audioContext) {
+      return this.sound._audioEngine.audioContext.sampleRate;
+    }
+    return 44100; // Default fallback
+  }
+
+  /**
    * Dispose of the sound and free resources
    */
   dispose() {
