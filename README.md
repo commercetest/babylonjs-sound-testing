@@ -13,14 +13,28 @@ babylonjs-sound-testing/
 ├── ideas/                      # Planning and strategy documents
 │   └── sound-testing-strategy.md
 ├── src/                        # Source code
-│   └── soundWrapper.js         # BabylonJS Sound API wrapper
+│   ├── soundWrapper.js         # BabylonJS Sound API wrapper
+│   └── audioTestUtils.js       # Audio generation and analysis utilities
 ├── tests/                      # Test files
 │   ├── fixtures/               # Test audio files and fixtures
 │   ├── phase1-creation.test.js # Sound creation & loading tests
 │   ├── phase1-playback.test.js # Playback state tests
-│   └── phase1-configuration.test.js # Configuration properties tests
+│   ├── phase1-configuration.test.js # Configuration properties tests
+│   ├── phase2-frequency-detection.test.js # Frequency analysis tests
+│   ├── phase2-audio-output.test.js # Audio output verification tests
+│   ├── phase2-timing.test.js   # Timing and synchronization tests
+│   ├── phase3-pitch-accuracy.test.js # Pitch/tone accuracy tests
+│   ├── phase3-volume-amplitude.test.js # Volume and amplitude tests
+│   ├── phase3-audio-quality.test.js # Audio quality assessment tests
+│   ├── phase3-spatial-audio.test.js # Spatial audio tests
+│   ├── edge-cases.test.js      # Edge cases and boundary conditions
+│   ├── error-handling.test.js  # Error handling and validation
+│   ├── untested-functions.test.js # Previously untested functions
+│   └── resource-cleanup.test.js # Resource cleanup and memory tests
 ├── public/                     # Static files for dev server
 │   └── index.html             # Test environment page
+├── scripts/                    # Utility scripts
+│   └── test-with-server.sh    # Automated test script with server
 └── package.json               # Dependencies and scripts
 ```
 
@@ -94,9 +108,10 @@ npm run test:ui
 
 ## Test Summary
 
-**Total: 112 tests passing** ✓
+**Total: 148 tests passing** ✓
 - Phase 1: 36 tests (API & State Management)
 - Phase 2: 17 tests (Audio Analysis & Timing)
+- Phase 3: 36 tests (Advanced Audio Testing)
 - Edge Cases & Boundaries: 16 tests
 - Error Handling & Validation: 19 tests
 - Previously Untested Functions: 11 tests
@@ -284,13 +299,112 @@ Tests proper resource cleanup to prevent memory leaks:
 3. **Overly strict timing tests** - Adjusted for headless browser variance
 4. **Browser compatibility** - Added graceful handling for edge cases
 
-## Next Steps: Phase 3
+## Phase 3: Advanced Audio Testing (IMPLEMENTED ✓)
 
-### Phase 3: Advanced Testing (Not Yet Implemented)
-- Tone/pitch accuracy verification with playback rate changes
-- Volume amplitude analysis and fade testing
-- Audio quality assessment (distortion, clipping detection)
-- Spatial audio testing with 3D positioning
+Phase 3 implements comprehensive audio quality and spatial testing using Web Audio API analysis techniques. These tests verify pitch accuracy, volume behavior, audio quality metrics, and spatial positioning.
+
+### Test Coverage (36 tests passing)
+
+#### Pitch/Tone Accuracy (6 tests)
+- ✓ Playback rate effects on pitch (2x speed increases frequency)
+- ✓ Reduced playback rate (0.5x speed decreases frequency)
+- ✓ Pitch maintenance at 1.0 playback rate
+- ✓ Fractional playback rates (1.5x speed)
+- ✓ Pitch consistency across multiple playbacks
+- ✓ Musical interval verification (octave relationships)
+
+#### Volume/Amplitude Analysis (8 tests)
+- ✓ Volume level detection at different gain values
+- ✓ Reduced amplitude at lower volumes
+- ✓ Near-zero amplitude at very low volumes
+- ✓ Volume relationship across multiple levels (0.25, 0.5, 0.75, 1.0)
+- ✓ Linear fade effect detection over time
+- ✓ Exponential fade handling
+- ✓ Peak amplitude measurement accuracy
+- ✓ Dynamic range measurement between loud and soft passages
+
+#### Audio Quality Assessment (10 tests)
+- ✓ Clipping detection when amplitude exceeds 1.0
+- ✓ No clipping at safe amplitude levels
+- ✓ Clipping percentage calculation
+- ✓ Harmonic distortion detection in frequency spectrum
+- ✓ Signal-to-noise ratio measurement
+- ✓ Sine wave purity verification
+- ✓ DC offset detection and measurement
+- ✓ No DC offset in clean tones
+- ✓ Sample integrity verification (all finite numbers)
+- ✓ Waveform discontinuity detection
+
+#### Spatial Audio (12 tests)
+- ✓ Stereo panning to left channel (-1.0)
+- ✓ Stereo panning to right channel (1.0)
+- ✓ Center audio positioning (0.0)
+- ✓ Fractional pan values (0.5)
+- ✓ Independent left and right channel creation
+- ✓ Mono to stereo handling
+- ✓ 3D panner node creation with HRTF
+- ✓ Listener position and orientation
+- ✓ Distance model configuration (inverse, refDistance, maxDistance)
+- ✓ Different panning models (equalpower, HRTF)
+- ✓ Dynamic panning changes over time (scheduled automation)
+- ✓ Binaural audio configuration
+
+### Phase 3 Implementation Details
+
+**Advanced Analysis Techniques**
+Phase 3 uses sophisticated Web Audio API analysis:
+
+```javascript
+// Frequency analysis with high resolution FFT
+const analyser = audioContext.createAnalyser();
+analyser.fftSize = 8192; // Large FFT for better frequency resolution
+
+// Peak amplitude measurement
+let peak = 0;
+for (let i = 0; i < numSamples; i++) {
+  peak = Math.max(peak, Math.abs(channelData[i]));
+}
+
+// Signal-to-noise ratio calculation
+const maxValue = Math.max(...frequencyData);
+const noiseFloor = averageExcludingPeaks(frequencyData);
+const snr = maxValue - noiseFloor; // in dB
+```
+
+**Spatial Audio Testing**
+Tests verify both stereo panning and 3D positioning:
+
+```javascript
+// Stereo panning
+const panner = audioContext.createStereoPanner();
+panner.pan.value = -1.0; // Full left
+
+// 3D positioning with HRTF
+const panner3d = audioContext.createPanner();
+panner3d.panningModel = 'HRTF';
+panner3d.positionX.value = -1;
+panner3d.positionZ.value = -1;
+
+// Listener orientation
+listener.forwardZ.value = -1; // Looking forward (negative Z)
+listener.upY.value = 1;       // Up vector
+```
+
+**Audio Quality Metrics**
+- **Clipping Detection**: Count samples exceeding threshold (0.95-0.99)
+- **SNR Measurement**: Difference between peak signal and noise floor
+- **DC Offset**: Average of all samples (should be ~0 for clean audio)
+- **Dynamic Range**: Ratio of RMS values between loud and soft passages
+- **Harmonic Distortion**: FFT analysis looking for harmonics at 2x, 3x fundamental
+
+### Headless Browser Adaptations
+
+Phase 3 tests account for headless browser limitations:
+- **Frequency Detection**: Tests verify trends rather than exact frequencies (30-40% tolerance)
+- **Timing Variance**: Scheduled parameter automation uses wide time windows
+- **FFT Resolution**: High-resolution FFT (8192-16384) for better frequency analysis
+- **Multiple Samples**: Consistency tests use multiple measurements to verify behavior
+- **Boolean Infrastructure Tests**: Some tests verify the analysis infrastructure works rather than exact detection results
 
 See `ideas/sound-testing-strategy.md` for detailed planning.
 
