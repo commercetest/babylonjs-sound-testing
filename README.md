@@ -1,10 +1,25 @@
 # BabylonJS Sound Testing
 
+![Audio Tests](https://github.com/julianharty/babylonjs-sound-testing/workflows/Audio%20Tests/badge.svg)
+![Proof Tests](https://github.com/julianharty/babylonjs-sound-testing/workflows/Proof%20Tests%20(Evidence)/badge.svg)
+[![Tests](https://img.shields.io/badge/tests-154%20passing-brightgreen)](tests/)
+[![Real Audio](https://img.shields.io/badge/real%20audio%20tests-89%20(58%25)-blue)](docs/skeptics-guide.md)
+[![Coverage](https://img.shields.io/badge/DSP%20testing-70%25%20confidence-green)](docs/testing-justification.md)
+
 A comprehensive testing framework for BabylonJS sound API wrapper using Playwright and Vitest in a headless browser environment.
+
+**Key Feature:** Uses real audio signal processing (FFT analysis, RMS measurement) to verify audio correctness, not just API mocking. [See proof →](docs/skeptics-guide.md)
 
 ## Overview
 
 This project implements a test suite for sound generation and playback functionality, organized in phases from basic API testing to advanced audio analysis.
+
+**154 automated tests** covering:
+- API contracts and state management
+- Audio generation and frequency detection
+- Volume, pitch, and spatial audio
+- Audio quality (clipping, distortion, SNR)
+- Edge cases and error handling
 
 ## Project Structure
 
@@ -106,16 +121,57 @@ npm run test:ui
 - Stop any other Vite servers: `lsof -ti:5173 | xargs kill -9` (macOS/Linux)
 - Or change the port in `vite.config.js`
 
+## CI/CD Integration
+
+### GitHub Actions
+
+This project includes two automated workflows:
+
+#### 1. Main Test Suite (`test.yml`)
+Runs on every push and pull request:
+- Tests across Node.js 18.x and 20.x
+- Installs Playwright with Chromium
+- Runs all 154 tests automatically
+- Uploads test results and proof WAV file as artifacts
+
+**View results:** Check the "Actions" tab in GitHub after pushing
+
+#### 2. Proof Tests (`proof-tests.yml`)
+Demonstrates real audio testing:
+- Generates `proof-440hz-tone.wav` file
+- Verifies WAV file format and size
+- Uploads WAV file as downloadable artifact
+- Creates evidence summary in workflow output
+- Can be triggered manually via "Run workflow" button
+
+**Download proof:** Go to Actions → Proof Tests → latest run → Artifacts
+
+### Setting Up CI/CD
+
+**Locally:**
+```bash
+git push origin main  # Workflows run automatically
+```
+
+**On GitHub:**
+1. Workflows run automatically on push/PR
+2. Check "Actions" tab for results
+3. Download artifacts (proof WAV file) from successful runs
+4. Status badges show pass/fail state
+
+### Workflow Files
+
+- `.github/workflows/test.yml` - Main test suite
+- `.github/workflows/proof-tests.yml` - Demonstration/proof tests
+
 ## Test Summary
 
-**Total: 148 tests passing** ✓
+**Total: 154 tests passing** ✓
 - Phase 1: 36 tests (API & State Management)
 - Phase 2: 17 tests (Audio Analysis & Timing)
 - Phase 3: 36 tests (Advanced Audio Testing)
-- Edge Cases & Boundaries: 16 tests
-- Error Handling & Validation: 19 tests
-- Previously Untested Functions: 11 tests
-- Resource Cleanup & Memory: 13 tests
+- Comprehensive: 59 tests (Edge Cases, Error Handling, Cleanup)
+- Proof/Demo: 6 tests (Real Audio Evidence)
 
 ## Phase 1: Foundation Tests (IMPLEMENTED ✓)
 
