@@ -1,8 +1,7 @@
 # BabylonJS Sound Testing
-
-![Audio Tests](https://github.com/julianharty/babylonjs-sound-testing/workflows/Audio%20Tests/badge.svg)
-![Proof Tests](https://github.com/julianharty/babylonjs-sound-testing/workflows/Proof%20Tests%20(Evidence)/badge.svg)
 [![Tests](https://img.shields.io/badge/tests-154%20passing-brightgreen)](tests/)
+[![Audio Tests](https://github.com/commercetest/babylonjs-sound-testing/actions/workflows/test.yml/badge.svg)](https://github.com/commercetest/babylonjs-sound-testing/actions/workflows/test.yml)
+[![Proof Tests (Evidence)](https://github.com/commercetest/babylonjs-sound-testing/actions/workflows/proof-tests.yml/badge.svg)](https://github.com/commercetest/babylonjs-sound-testing/actions/workflows/proof-tests.yml)
 [![Real Audio](https://img.shields.io/badge/real%20audio%20tests-89%20(58%25)-blue)](docs/skeptics-guide.md)
 [![Coverage](https://img.shields.io/badge/DSP%20testing-70%25%20confidence-green)](docs/testing-justification.md)
 
